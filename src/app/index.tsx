@@ -1,7 +1,8 @@
+import VehicleFormModal from '@/components/VehicleFormModal';
 import { useState } from 'react';
-import { FlatList, StyleSheet, Text, View, Pressable, TextInput } from 'react-native';
+import { FlatList, StyleSheet, Text, View, Pressable, TextInput, Modal, Alert } from 'react-native';
 
-type Vehicle = {
+export type Vehicle = {
   id: string;
   brand: string;
   model: string;
@@ -9,7 +10,7 @@ type Vehicle = {
   price: number;
 };
 
-const initialVehicles: Vehicle[] = [
+export const initialVehicles: Vehicle[] = [
   {
     id: '1',
     brand: 'Toyota',
@@ -24,48 +25,19 @@ const initialVehicles: Vehicle[] = [
     year: 2023,
     price: 32000,
   },
-  {
-    id: '3',
-    brand: 'Volkswagen',
-    model: 'Golf',
-    year: 2022,
-    price: 21000,
-  },
-  {
-    id:"4",
-    brand: "Chevrolet",
-    model: "Onix",
-    year: 2025,
-    price: 22500,
-  },
 ];
 
 
 export default function HomeScreen() {   //defines the main screen component of the application
+  const [ formVisible, setFormVisible] = useState(false);
   const [ vehicles, setVehicles] = useState<Vehicle[]>(  //creates a state variable called "vehicles" initialized with initialVehicles array.//Vehicles[] means that the state conatains an array of Vehicle objects.//setVehicles is the function used to update the vehicles state.
     initialVehicles
-  );
-  const [ brand, setBrand] = useState('');  //creates a state variable called "brand" initialized with an empty string as its initial value. //setBrand allows us to update the brand entered by the user.
-  
-  function addVehicle() {          //defines the function that adds a new vehicle to the inventory.
-    if (brand.trim() === '') {     //removes surrounding whitespace and checks whether the input is empty.
-      return;                      //stops the function if the user has not entered a brand.
-    }
-    const newVehicle: Vehicle = {  // Creates a new object that follows the Vehicle type structure.
-      id: String(Date.now()),      // Generates a unique-looking string ID based on the current timestamp.
-      brand: brand.trim(),         // Stores the brand entered by the user, removing surrounding whitespace.
-      model: "Unkown",             
-      year: 2026,
-      price: 0,
-    };
+  );   
 
-    setVehicles((currentVehicles) => [ //Updates the current vehicles state by creating a new array
-      ...currentVehicles,  //copes all vehicles that are already in the inventory  ->  spread operator
-      newVehicle,           //adds the new vehicle to the end of the array
-    ]);
-
-    setBrand('');           // Clears the input after successfully adding the vehicle.
+  function addVehicle() {
+    setFormVisible(true);
   }
+
   return (
     <View style={styles.container}>
       <Text style={styles.eyebrow}>INVENTORY MANAGEMENT</Text>
@@ -110,12 +82,7 @@ export default function HomeScreen() {   //defines the main screen component of 
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
       />
-      <TextInput
-        style={styles.input}
-        placeholder='Enter vehicle brand'
-        value={brand}
-        onChangeText={setBrand}
-      ></TextInput>
+  
       <Pressable
         style={styles.addButton}
         onPress={addVehicle}
@@ -124,6 +91,11 @@ export default function HomeScreen() {   //defines the main screen component of 
           Add vehicle
         </Text>
       </Pressable>
+      <VehicleFormModal 
+        isFormVisible={formVisible} 
+        onClose={() => setFormVisible(false)} 
+        onSubmit={(vehicle) => setVehicles((currentVehicles) => [...currentVehicles, vehicle])}
+      />
     </View>
   );
 }
@@ -241,9 +213,10 @@ const styles = StyleSheet.create({
   alignItems: 'center',
   marginBottom: 20,
 },
-addButtonText: {
+  addButtonText: {
   color: '#FFFFFF',
   fontSize: 15,
   fontWeight: '700',
 },
+
 });
